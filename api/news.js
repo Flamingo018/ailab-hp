@@ -23,14 +23,24 @@ export default async function handler(req, res) {
       }
     );
 
-    if (notionRes.status === 401) return res.status(401).json({ error: 'Unauthorized' });
-    if (notionRes.status === 403) return res.status(403).json({ error: 'Forbidden' });
-    if (!notionRes.ok) return res.status(notionRes.status).json({ error: 'Notion API error' });
-
     const data = await notionRes.json();
+
+    // ステータスとレスポンス全体をログに出す
+    console.log('Notion status:', notionRes.status);
+    console.log('Notion response:', JSON.stringify(data));
+
+    if (!notionRes.ok) {
+      return res.status(notionRes.status).json({ 
+        error: 'Notion API error', 
+        status: notionRes.status,
+        detail: data 
+      });
+    }
+
     return res.status(200).json(data);
 
   } catch (e) {
+    console.log('Exception:', e.message);
     return res.status(500).json({ error: e.message });
   }
 }
