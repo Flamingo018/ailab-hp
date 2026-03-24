@@ -1,4 +1,4 @@
-const DB_ID = '6dbfb8210ab542539384685598d4c79b';
+const DB_ID = '4505f7875598469fbc7eb75a4529c271';
 
 export default async function handler(req, res) {
   const token = req.query.token;
