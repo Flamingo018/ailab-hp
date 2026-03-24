@@ -197,18 +197,8 @@ function connect() {
 async function load() {
   setStatus('loading', 'Notionからデータ取得中...');
   try {
-    const res = await fetch(`https://api.notion.com/v1/databases/${DB_ID}/query`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { property: 'Published', checkbox: { equals: true } },
-        sorts: [{ property: 'Date', direction: 'descending' }]
-      })
-    });
+    // Vercel API Route経由でNotionを呼ぶ（CORSを回避）
+    const res = await fetch(`/api/news?token=${encodeURIComponent(token)}`);
 
     if (res.status === 401) { setStatus('error', '認証エラー：APIキーを確認してください'); renderList([],'auth'); return; }
     if (res.status === 403) { setStatus('error', 'アクセス拒否：DBにIntegrationを接続してください'); renderList([],'perm'); return; }
@@ -228,12 +218,8 @@ async function load() {
     filter(currentFilter);
 
   } catch (e) {
-    if (e.message.includes('fetch') || e.message.includes('CORS')) {
-      // ローカルHTMLからのCORSエラーの場合はデモデータで表示
-      loadDemo();
-    } else {
-      setStatus('error', `エラー: ${e.message}`);
-    }
+    setStatus('error', `エラー: ${e.message}`);
+    loadDemo();
   }
 }
 
