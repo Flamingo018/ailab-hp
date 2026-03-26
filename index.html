@@ -38,30 +38,9 @@ nav span { color: #d9d9d9; font-size: 12px; }
   font-weight: 700; color: #1e6b86; margin-bottom: 24px;
 }
 
-/* SETUP */
-.setup-card {
-  background: white; border: 1px solid #d9d9d9; border-radius: 10px;
-  padding: 24px 28px; margin-bottom: 24px;
-}
-.setup-card h3 { font-size: 15px; color: #1e6b86; margin-bottom: 10px; }
-.setup-card p { font-size: 13px; color: #757575; margin-bottom: 14px; line-height: 1.7; }
-.setup-card a { color: #1e6b86; }
-.input-row { display: flex; gap: 8px; }
-.input-row input {
-  flex: 1; padding: 10px 14px; border: 1px solid #d9d9d9;
-  border-radius: 6px; font-size: 13px; font-family: monospace;
-}
-.input-row input:focus { outline: none; border-color: #1e6b86; }
-.connect-btn {
-  padding: 10px 20px; background: #1e6b86; color: white; border: none;
-  border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-}
-.connect-btn:hover { background: #165a72; }
-.db-hint { font-size: 11px; color: #aaa; margin-top: 6px; font-family: monospace; }
-
 /* STATUS */
 .status-bar {
-  display: none; align-items: center; gap: 10px; font-size: 12px; color: #555;
+  display: flex; align-items: center; gap: 10px; font-size: 12px; color: #555;
   margin-bottom: 16px; padding: 8px 14px; background: #eef7fa;
   border-radius: 6px; border: 1px solid #c8e8f0;
 }
@@ -78,7 +57,7 @@ nav span { color: #d9d9d9; font-size: 12px; }
 .reload-btn:hover { background: #1e6b86; color: white; }
 
 /* TABS */
-.tabs { display: flex; gap: 6px; border-bottom: 1px solid #1e1e1e; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid #1e1e1e; margin-bottom: 0; }
 .tab {
   padding: 10px 20px; font-size: 14px; cursor: pointer;
   border: 1px solid #8c8c8c; border-bottom: none;
@@ -139,13 +118,16 @@ footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 80px; pad
   <span>Notionを更新 → 「再取得」ボタンを押すだけで即反映！報告会デモ用ページ</span>
 </div>
 
+<div class="section" id="news">
+  <div class="section-title">News</div>
+
   <div class="status-bar" id="status-bar">
     <div class="dot" id="dot"></div>
-    <span id="status-text">接続中...</span>
+    <span id="status-text">読み込み中...</span>
     <button class="reload-btn" onclick="load()">↺ 再取得</button>
   </div>
 
-  <div class="tabs" id="tabs" style="display:none">
+  <div class="tabs">
     <button class="tab active" onclick="filter('all',this)">すべて</button>
     <button class="tab" onclick="filter('イベント',this)">イベント</button>
     <button class="tab" onclick="filter('メディア掲載',this)">メディア掲載</button>
@@ -156,11 +138,9 @@ footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 80px; pad
 
   <div class="btn-wrap"><button class="btn-primary">お知らせ一覧 ›</button></div>
 </div>
-</div>
 
 <footer>
-  あいらぼ＊ — 報告会デモページ（Notion API連携テスト）<br>
-  ※ このHTMLファイル単体で動作します。サーバー不要。
+  あいらぼ＊ — 報告会デモページ（Notion API連携テスト）
 </footer>
 
 <script>
@@ -218,7 +198,6 @@ function fmtDate(s) {
   return s.slice(0, 10).replace(/-/g, '/');
 }
 
-// ページ読み込み時に自動取得
 load();
 </script>
 </body>
