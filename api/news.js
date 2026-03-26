@@ -1,14 +1,14 @@
-const DB_ID = process.env.NOTION_DB_ID;
-
 export default async function handler(req, res) {
-  const token = req.query.token;
-  if (!token) {
-    return res.status(400).json({ error: 'token is required' });
+  const token = process.env.NOTION_TOKEN;
+  const dbId  = process.env.NOTION_DB_ID;
+
+  if (!token || !dbId) {
+    return res.status(500).json({ error: 'Server configuration missing' });
   }
 
   try {
     const notionRes = await fetch(
-      `https://api.notion.com/v1/databases/${DB_ID}/query`,
+      `https://api.notion.com/v1/databases/${dbId}/query`,
       {
         method: 'POST',
         headers: {
@@ -24,23 +24,10 @@ export default async function handler(req, res) {
     );
 
     const data = await notionRes.json();
-
-    // ステータスとレスポンス全体をログに出す
-    console.log('Notion status:', notionRes.status);
-    console.log('Notion response:', JSON.stringify(data));
-
-    if (!notionRes.ok) {
-      return res.status(notionRes.status).json({ 
-        error: 'Notion API error', 
-        status: notionRes.status,
-        detail: data 
-      });
-    }
-
+    if (!notionRes.ok) return res.status(notionRes.status).json({ error: 'Notion API error', detail: data });
     return res.status(200).json(data);
 
   } catch (e) {
-    console.log('Exception:', e.message);
     return res.status(500).json({ error: e.message });
   }
 }
