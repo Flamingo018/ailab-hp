@@ -139,25 +139,6 @@ footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 80px; pad
   <span>Notionを更新 → 「再取得」ボタンを押すだけで即反映！報告会デモ用ページ</span>
 </div>
 
-<div class="section" id="news">
-  <div class="section-title">News</div>
-
-  <div class="setup-card" id="setup-card">
-    <h3>🔑 Notion Integration Token を入力してください</h3>
-    <p>
-      <strong>取得手順：</strong><br>
-      ① <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → 「New integration」→ Internal → Submit<br>
-      ② 作成されたトークン（<code>ntn_xxx...</code> など）をコピー<br>
-      ③ あいらぼ News DBを開く → 右上「…」→「Connect to」→ 作成したIntegrationを選択<br>
-      ④ 以下にトークンを貼り付けて「接続する」
-    </p>
-    <div class="input-row">
-      <input type="password" id="key-input" placeholder="ntn_xxxxxxxx... または secret_xxxxxxxx..." />
-      <button class="connect-btn" onclick="connect()">接続する</button>
-    </div>
-    <div class="db-hint">DB ID（自動設定済み）: 6dbfb821-0ab5-4253-9384-685598d4c79b</div>
-  </div>
-
   <div class="status-bar" id="status-bar">
     <div class="dot" id="dot"></div>
     <span id="status-text">接続中...</span>
@@ -182,28 +163,13 @@ footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 80px; pad
 </footer>
 
 <script>
-const DB_ID = '6dbfb8210ab542539384685598d4c79b';
-let allData = [], currentFilter = 'all', token = '';
-
-function connect() {
-  token = document.getElementById('key-input').value.trim();
-  if (!token) { alert('Integration Tokenを入力してください'); return; }
-  document.getElementById('setup-card').style.display = 'none';
-  document.getElementById('status-bar').style.display = 'flex';
-  document.getElementById('tabs').style.display = 'flex';
-  load();
-}
+let allData = [], currentFilter = 'all';
 
 async function load() {
   setStatus('loading', 'Notionからデータ取得中...');
   try {
-    // Vercel API Route経由でNotionを呼ぶ（CORSを回避）
-    const res = await fetch(`/api/news?token=${encodeURIComponent(token)}`);
-
-    if (res.status === 401) { setStatus('error', '認証エラー：APIキーを確認してください'); renderList([],'auth'); return; }
-    if (res.status === 403) { setStatus('error', 'アクセス拒否：DBにIntegrationを接続してください'); renderList([],'perm'); return; }
+    const res = await fetch('/api/news');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
     const json = await res.json();
     allData = json.results.map(p => ({
       title: p.properties['Name']?.title?.[0]?.plain_text || '（タイトルなし）',
@@ -212,26 +178,11 @@ async function load() {
       url: p.properties['URL']?.url || '',
       notionUrl: p.url
     }));
-
-    const count = allData.length;
-    setStatus('ok', `✅ ${count}件取得完了 ← Notionを更新して「↺ 再取得」を押すと即反映！`);
+    setStatus('ok', `✅ ${allData.length}件取得完了 ← Notionを更新して「↺ 再取得」を押すと即反映！`);
     filter(currentFilter);
-
   } catch (e) {
     setStatus('error', `エラー: ${e.message}`);
-    loadDemo();
   }
-}
-
-function loadDemo() {
-  allData = [
-    { title: 'Maker Faire Tokyo 2025 出展決定！', category: 'イベント', date: '2026/03/20', url: 'https://makezine.jp/event/mft2025/' },
-    { title: '大阪工業大学 技術交流イベントに登壇します', category: 'イベント', date: '2026/03/10', url: '' },
-    { title: 'XSAが関西テックメディアに掲載されました', category: 'メディア掲載', date: '2026/02/28', url: '' },
-    { title: '新メンバー募集中！2026年春コホート', category: 'お知らせ', date: '2026/02/15', url: '' },
-  ];
-  setStatus('ok', '⚠️ デモモード（CORS制限）— VercelやNext.jsから呼ぶと実データが取得できます');
-  filter(currentFilter);
 }
 
 function filter(f, btn) {
@@ -243,13 +194,11 @@ function filter(f, btn) {
   renderList(list);
 }
 
-function renderList(items, err) {
+function renderList(items) {
   const el = document.getElementById('news-list');
-  if (err === 'auth') { el.innerHTML = '<div class="empty">🔑 APIキーが無効です。Notion Integration Tokenを確認してください。</div>'; return; }
-  if (err === 'perm') { el.innerHTML = '<div class="empty">🔒 DBへのアクセス権がありません。DBの「Connect to」からIntegrationを追加してください。</div>'; return; }
   if (!items.length) { el.innerHTML = '<div class="empty">該当するお知らせはありません</div>'; return; }
   el.innerHTML = items.map(item => `
-    <a class="news-item" href="${item.url || item.notionUrl || '#'}" target="${item.url ? '_blank' : '_self'}" rel="noopener">
+    <a class="news-item" href="${item.url || item.notionUrl || '#'}" target="_blank" rel="noopener">
       <span class="news-date">${item.date}</span>
       <span class="news-cat cat-${item.category}">${item.category}</span>
       <span class="news-title">${item.title}</span>
@@ -267,6 +216,9 @@ function fmtDate(s) {
   if (!s) return '—';
   return s.slice(0, 10).replace(/-/g, '/');
 }
+
+// ページ読み込み時に自動取得
+load();
 </script>
 </body>
 </html>
